@@ -20,8 +20,8 @@ tidy_inputGWAS <- function(GWAS, verbose=FALSE){
   if(verbose) cat("# Preparation of the data... \n")
 
   GWASnames = list(SNPID = c("rsid", "snpid", "snp", "rnpid", "rs", "MarkerName"),
-                   ALT = c("a1", "alt", "alts", "Allele1"),
-                   REF = c("ref", "a0", "a2", "Allele2"),
+                   ALT = c("a1", "alt", "alts", "Allele1", "A1"),
+                   REF = c("ref", "a0", "a2", "Allele2", "A2"),
                    BETA = c("beta", "b", "beta1", "or"),
                    SE = c("se", "std"),
                    Z = c("z", "zscore"),
