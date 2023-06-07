@@ -19,11 +19,9 @@ tidy_inputGWAS <- function(GWAS, verbose=FALSE){
 
   if(verbose) cat("# Preparation of the data... \n")
 
-  GWASnames = list(SNPID = c("rsid", "snpid", "snp", "rnpid", "rs"),
-                   CHR = c("chr"),
-                   POS = c("pos"),
-                   ALT = c("a1", "alt", "alts"),
-                   REF = c("ref", "a0", "a2"),
+  GWASnames = list(SNPID = c("rsid", "snpid", "snp", "rnpid", "rs", "MarkerName),
+                   ALT = c("a1", "alt", "alts", "Allele1"),
+                   REF = c("ref", "a0", "a2", "Allele2"),
                    BETA = c("beta", "b", "beta1", "or"),
                    SE = c("se", "std"),
                    Z = c("z", "zscore"),
@@ -61,12 +59,6 @@ tidy_inputGWAS <- function(GWAS, verbose=FALSE){
   if(sum(HeaderGWAS %in% GWASnames[["SNPID"]])>1) stop("multiple SNPID columns, please provide only one", call. = FALSE)
 
   tmp = paste0("   SNPID column, ok")
-
-  if(all(!HeaderGWAS %in% GWASnames[["CHR"]])) stop("no CHR column", call. = FALSE)
-  tmp = c(tmp, "CHR column, ok")
-
-  if(all(!HeaderGWAS %in% GWASnames[["POS"]])) stop("no POS column", call. = FALSE)
-  tmp = c(tmp, "POS column, ok")
 
   if(all(!HeaderGWAS %in% GWASnames[["ALT"]])) stop("no ALT column", call. = FALSE)
   if(sum(HeaderGWAS %in% GWASnames[["ALT"]])>1) stop("multiple ALT columns, please provide only one", call. = FALSE)
@@ -122,10 +114,6 @@ tidy_inputGWAS <- function(GWAS, verbose=FALSE){
   # use col numbers because of different lower/upper possibilities
   SNPID = match(HeaderGWAS, GWASnames[["SNPID"]])
   SNPID = which(!is.na(SNPID))[1]
-  CHR = match(HeaderGWAS, GWASnames[["CHR"]])
-  CHR = which(!is.na(CHR))[1]
-  POS = match(HeaderGWAS, GWASnames[["POS"]])
-  POS = which(!is.na(POS))[1]
   ALT = match(HeaderGWAS, GWASnames[["ALT"]])
   ALT = which(!is.na(ALT))[1]
   REF = match(HeaderGWAS, GWASnames[["REF"]])
@@ -141,8 +129,8 @@ tidy_inputGWAS <- function(GWAS, verbose=FALSE){
   N = match(HeaderGWAS, GWASnames[["N"]])
   N = which(!is.na(N))[1]
 
-  colNumbers = c(SNPID, CHR, POS, ALT, REF, BETA, SE, ZSTAT, N)
-  colNames = c("rsid", "chr", "pos", "alt", "ref", "beta", "se", "Z", "N")
+  colNumbers = c(SNPID,  ALT, REF, BETA, SE, ZSTAT, N)
+  colNames = c("rsid",  "alt", "ref", "beta", "se", "Z", "N")
   colNames = colNames[!is.na(colNumbers)]
   colNumbers = colNumbers[!is.na(colNumbers)]
 
@@ -179,12 +167,6 @@ tidy_inputGWAS <- function(GWAS, verbose=FALSE){
     dplyr::mutate(std_beta = .data$Z/sqrt(.data$N),
                   std_SE = 1/sqrt(.data$N),
                   p = 2*stats::pnorm(-abs(.data$Z))) -> GWASData_clean
-  # remove HLA region (slice do not work well if there is this region is already excluded and no SNP are in the range)
-  #  slice(-which(chr==6 & pos>=28.5e6 & pos<=33.5e6))
-  if(GWASData_clean %>% dplyr::filter(.data$chr==6 & .data$pos>=28.5e6 & .data$pos<=33.5e6) %>% nrow()>0){
-    GWASData_clean %>%
-      dplyr::slice(-which(.data$chr==6 & .data$pos>=28.5e6 & .data$pos<=33.5e6)) -> GWASData_clean
-  }
 
   res=GWASData_clean
   return(res)
